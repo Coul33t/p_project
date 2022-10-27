@@ -8,9 +8,10 @@
 #include <string>
 #include <iostream>
 
-#include <raylib.h>
+#include <SFML/Window.hpp>
+#include <SFML/Graphics.hpp>
 
-#include "../../game/include/map.h"
+#include "../../common/include/map.h"
 #include "../../tools/include/tools.h"
 #include "params.h"
 #include "constants.h"
@@ -20,20 +21,23 @@ public:
     Editor();
     ~Editor();
 
-    void init(int w = 640, int h = 320, int tile_size = 8);
+    void init(int w = 640, int h = 320, int tile_size = 16);
     void open() const;
     void run();
 
-    void loadTileset(const std::string& path);
+    bool loadTileset(const std::string& path);
 
-    void handleInput();
+    void handleEvent(sf::Event e);
+    void handleMouseInput(sf::Event e);
 
 
     EditorParams params;
     TilesetParams tileset_params;
 
+    sf::RenderWindow window;
+
     Map map;
-    Texture2D tileset;
+    sf::Texture tileset;
 };
 
 #endif //P_PROJECT_EDITOR_H

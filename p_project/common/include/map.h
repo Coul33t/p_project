@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "tile.h"
+#include "tools.h"
 
 class Map {
 public:
@@ -15,5 +16,7 @@ public:
     ~Map();
 
     std::vector<Tile> tiles;
+    Size size;
+
 };
 #endif //P_PROJECT_MAP_H

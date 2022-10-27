@@ -9,9 +9,13 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 INCLUDE_DIRECTORIES(/usr/local/include)
 LINK_DIRECTORIES(/usr/local/lib)
 
+find_package(SFML COMPONENTS graphics window system REQUIRED)
+
 set(ACTUAL_SOURCE_DIR ${PROJECT_SOURCE_DIR}/p_project)
 
 INCLUDE_DIRECTORIES(
+        ${ACTUAL_SOURCE_DIR}/common/include/
+        ${ACTUAL_SOURCE_DIR}/common/src/
         ${ACTUAL_SOURCE_DIR}/game/include/
         ${ACTUAL_SOURCE_DIR}/game/src/
         ${ACTUAL_SOURCE_DIR}/map_maker/include/
@@ -21,6 +25,11 @@ INCLUDE_DIRECTORIES(
 )
 
 file(GLOB all_SRCS
+        "${ACTUAL_SOURCE_DIR}/common/include/*.h"
+        "${ACTUAL_SOURCE_DIR}/common/include/*.hpp"
+        "${ACTUAL_SOURCE_DIR}/common/src/*.cpp"
+        "${ACTUAL_SOURCE_DIR}/common/src/*.c"
+
         "${ACTUAL_SOURCE_DIR}/game/include/*.h"
         "${ACTUAL_SOURCE_DIR}/game/include/*.hpp"
         "${ACTUAL_SOURCE_DIR}/game/src/*.cpp"
@@ -33,10 +42,13 @@ file(GLOB all_SRCS
 
         "${ACTUAL_SOURCE_DIR}/tools/include/*.h"
         "${ACTUAL_SOURCE_DIR}/tools/include/*.hpp"
-        #"${ACTUAL_SOURCE_DIR}tools/src/*.cpp"
-        #"${ACTUAL_SOURCE_DIR}tools/src/*.c"
+        "${ACTUAL_SOURCE_DIR}/tools/src/*.cpp"
+        "${ACTUAL_SOURCE_DIR}/tools/src/*.c"
 )
 
-add_executable(p_project p_project/main.cpp ${all_SRCS} p_project/game/src/map.cpp p_project/game/src/world.cpp p_project/map_maker/include/constants.h p_project/map_maker/include/params.h p_project/tools/src/tools.cpp)
+add_executable(p_project p_project/main.cpp ${all_SRCS})
 
-TARGET_LINK_LIBRARIES(p_project libraylib.so)
+target_compile_features(p_project PUBLIC cxx_std_17)
+target_compile_definitions(p_project PRIVATE SFML_STATIC)
+target_link_libraries(p_project libraylib.so)
+target_link_libraries(p_project sfml-window sfml-graphics  sfml-system)
