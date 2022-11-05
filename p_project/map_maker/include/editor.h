@@ -7,9 +7,12 @@
 
 #include <string>
 #include <iostream>
+#include <sstream>
+#include <fstream>
 
 #include <SFML/Window.hpp>
 #include <SFML/Graphics.hpp>
+#include <SFML/System.hpp>
 
 #include "../../common/include/map.h"
 #include "../../tools/include/tools.h"

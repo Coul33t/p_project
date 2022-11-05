@@ -60,31 +60,6 @@ void Editor::run() {
         // end the current frame
         window.display();
     }
-
-
-
-    /*while (!WindowShouldClose()) {
-        BeginDrawing();
-
-        handleInput();
-
-        ClearBackground(WHITE);
-
-        DrawTextureRec(this->tileset,
-                       this->tileset_params.rect_to_draw,
-                       this->tileset_params.pos,
-                       Color(WHITE));
-
-        DrawText("0, 0", 0, 0, 20, LIGHTGRAY);
-        DrawText("100, 100", 100, 100, 20, LIGHTGRAY);
-        DrawText("200, 0", 200, 0, 20, LIGHTGRAY);
-        DrawText("0, 200", 0, 200, 20, LIGHTGRAY);
-
-        EndDrawing();
-    }
-
-    UnloadTexture(this->tileset);
-    CloseWindow();*/
 }
 
 void Editor::handleEvent(sf::Event e) {
