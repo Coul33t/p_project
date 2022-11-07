@@ -66,6 +66,7 @@ target_link_libraries(p_project sfml-window sfml-graphics sfml-system)
 
 if (UNIX)
     target_compile_definitions(p_project PRIVATE SFML_STATIC)
+    target_link_libraries(p_project -lstdc++fs)
 endif()
 
 if (WIN32 AND BUILD_SHARED_LIBS)
