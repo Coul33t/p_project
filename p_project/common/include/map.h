@@ -6,17 +6,31 @@
 #define P_PROJECT_MAP_H
 
 #include <vector>
+#include <iostream>
+
+#include <SFML/System.hpp>
 
 #include "tile.h"
 #include "tools.h"
 
-class Map {
+class Map : public sf::Drawable, public sf::Transformable {
 public:
     Map();
     ~Map();
 
+    void init(size_t x, size_t y);
+
+    void updateTile(const Rectangle& pos, const Rectangle& text_pos);
+
+    int quadIdx(const sf::VertexArray& quad);
+
     std::vector<Tile> tiles;
+    sf::VertexArray vertices_array;
+    sf::Texture tileset;
     Size size;
+
+private:
+    virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
 
 };
 #endif //P_PROJECT_MAP_H

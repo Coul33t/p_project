@@ -9,7 +9,7 @@
 
 struct EditorParams {
     Size size;
-    int scroll_speed = 16;
+    int scroll_speed = 4;
     Rectangle rect_to_draw;
 
     friend std::ostream& operator <<(std::ostream& os, const EditorParams ep) {
@@ -24,7 +24,7 @@ struct EditorParams {
 
 struct TilesetParams {
     Size size;
-    sf::Vector2i pos;
+    sf::Vector2<int> pos;
     int tile_size;
     Rectangle rect_to_draw;
 

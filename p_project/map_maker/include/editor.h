@@ -16,6 +16,7 @@
 
 #include "../../common/include/map.h"
 #include "../../tools/include/tools.h"
+#include "../../common/include/sprite.h"
 #include "params.h"
 #include "constants.h"
 
@@ -25,6 +26,7 @@ public:
     ~Editor();
 
     void init(int w = 640, int h = 320, int tile_size = 16);
+    void initMap(int w = 128, int h = 64);
     void open() const;
     void run();
 
@@ -40,7 +42,7 @@ public:
     sf::RenderWindow window;
 
     Map map;
-    sf::Texture tileset;
+    Sprite tileset;
 };
 
 #endif //P_PROJECT_EDITOR_H

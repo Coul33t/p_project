@@ -16,15 +16,23 @@ void Editor::init(int w, int h, int tile_size) {
     window.create(sf::VideoMode(this->params.size.w, this->params.size.h), "Map Editor");
 }
 
+void Editor::initMap(int w, int h) {
+    this->map.init(w, h);
+}
+
 void Editor::open() const {
 
 }
 
 bool Editor::loadTileset(const std::string& path) {
-    if(!this->tileset.loadFromFile(path)) {
-        std::cerr << "[editor.cpp] ERROR: couldn't load texture at " << path << "." << std::endl;
+    sf::Texture tileset_text;
+    if(!tileset_text.loadFromFile(path)) {
+        std::cerr << FULL_LOCATION
+                  << "ERROR: couldn't load texture at " << path << "." << std::endl;
         return false;
     }
+
+    this->tileset.setTexture(tileset_text);
 
     this->tileset_params.size.w = this->tileset.getSize().x;
     this->tileset_params.size.h = this->tileset.getSize().y;
@@ -41,6 +49,7 @@ void Editor::run() {
     //TODO: see RenderTexture for caching
     tileset_params.pos.x = this->params.size.w - this->tileset.getSize().x;
     tileset_params.pos.y = 0;
+    this->tileset.sprite.setPosition(tileset_params.pos.x, tileset_params.pos.y);
 
     while (this->window.isOpen()) {
         // check all the window's events that were triggered since the last iteration of the loop
@@ -52,7 +61,10 @@ void Editor::run() {
         }
 
         // clear the window with black color
-        window.clear(sf::Color::Black);
+        window.clear(sf::Color(240,226,182));
+
+        window.draw(this->tileset.sprite);
+        window.draw(this->map);
 
         // draw everything here...
         // window.draw(...);
@@ -69,6 +81,10 @@ void Editor::handleEvent(sf::Event e) {
             break;
 
         case sf::Event::MouseButtonPressed:
+            this->handleMouseInput(e);
+            break;
+
+        case sf::Event::MouseWheelMoved:
             this->handleMouseInput(e);
             break;
 
@@ -90,9 +106,11 @@ void Editor::handleMouseInput(sf::Event e) {
                              params.size.w - tileset_params.size.w, 0,
                              tileset_params.size.w, tileset_params.size.h)) {
 
+
         // Tileset scrolling
         if (e.type == sf::Event::MouseWheelMoved) {
             new_offset = e.mouseWheel.delta * params.scroll_speed;
+
 
             // If the y value is too high, set it to the max value (end of the tileset - height of the tileset)
             if (tileset_params.rect_to_draw.y - (new_offset * tileset_params.tile_size)
@@ -110,6 +128,11 @@ void Editor::handleMouseInput(sf::Event e) {
                 // Minus, because a bottom scrolling (negative offset) == y value increasing
                 tileset_params.rect_to_draw.y -= new_offset * tileset_params.tile_size;
             }
+
+            this->tileset.sprite.setTextureRect(sf::IntRect(tileset_params.rect_to_draw.x,
+                                                            tileset_params.rect_to_draw.y,
+                                                            tileset_params.rect_to_draw.w,
+                                                            tileset_params.rect_to_draw.h));
         }
 
         // Tile selection
@@ -139,6 +162,8 @@ void Editor::handleMouseInput(sf::Event e) {
             dest.y = new_pos.y;
             dest.w = new_pos.x + tileset_params.tile_size;
             dest.h = new_pos.y + tileset_params.tile_size;
+
+            this->map.updateTile(dest, params.rect_to_draw);
         }
 
     }
