@@ -21,7 +21,7 @@ void Editor::open() const {
 }
 
 bool Editor::loadTileset(const std::string& path) {
-    if(this->tileset.loadFromFile(path)) {
+    if(!this->tileset.loadFromFile(path)) {
         std::cerr << "[editor.cpp] ERROR: couldn't load texture at " << path << "." << std::endl;
         return false;
     }
