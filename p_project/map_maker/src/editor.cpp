@@ -9,11 +9,11 @@ Editor::Editor() = default;
 Editor::~Editor() = default;
 
 void Editor::init(int w, int h, int tile_size) {
-    this->params.size.w = w;
-    this->params.size.h = h;
-    this->tileset_params.tile_size = tile_size;
+    params.size.w = w;
+    params.size.h = h;
+    tileset_params.tile_size = tile_size;
 
-    window.create(sf::VideoMode(this->params.size.w, this->params.size.h), "Map Editor");
+    window.create(sf::VideoMode(params.size.w, params.size.h), "Map Editor");
 }
 
 void Editor::initMap(int w, int h) {
@@ -36,40 +36,40 @@ bool Editor::loadTileset(const std::string& path) {
 
     this->tileset.setTexture(tileset_text);
 
-    this->tileset_params.size.w = this->tileset.getSize().x;
-    this->tileset_params.size.h = this->tileset.getSize().y;
+    tileset_params.size.w = this->tileset.getSize().x;
+    tileset_params.size.h = this->tileset.getSize().y;
 
     // Set the upper-left tile as the first one selected
-    this->tileset_params.rect_to_draw_on_map.x = this->params.size.w - this->tileset_params.size.w;
-    this->tileset_params.rect_to_draw_on_map.y = 0;
-    this->tileset_params.rect_to_draw_on_map.w = this->tileset_params.tile_size;
-    this->tileset_params.rect_to_draw_on_map.h = this->tileset_params.tile_size;
+    tileset_params.rect_to_draw_on_map.x = params.size.w - tileset_params.size.w;
+    tileset_params.rect_to_draw_on_map.y = 0;
+    tileset_params.rect_to_draw_on_map.w = tileset_params.tile_size;
+    tileset_params.rect_to_draw_on_map.h = tileset_params.tile_size;
 
-    this->tileset_params.rect_to_draw.x = 0;
-    this->tileset_params.rect_to_draw.y = 0;
-    this->tileset_params.rect_to_draw.w = this->tileset_params.size.w;
-    this->tileset_params.rect_to_draw.h = this->params.size.h;
+    tileset_params.rect_to_draw.x = 0;
+    tileset_params.rect_to_draw.y = 0;
+    tileset_params.rect_to_draw.w = tileset_params.size.w;
+    tileset_params.rect_to_draw.h = params.size.h;
 
-    this->tileset_params.offset.x = this->params.size.w - this->tileset_params.size.w;
-    this->tileset_params.offset.y = 0;
+    tileset_params.offset.x = params.size.w - tileset_params.size.w;
+    tileset_params.offset.y = 0;
 
     return true;
 }
 
 void Editor::drawOverlayingShapes() {
     // Draw the current selected tile
-    sf::RectangleShape rectangle(sf::Vector2f(this->tileset_params.tile_size, this->tileset_params.tile_size));
+    sf::RectangleShape rectangle(sf::Vector2f(tileset_params.tile_size, tileset_params.tile_size));
     rectangle.setFillColor(sf::Color(0, 0, 0, 0));
     rectangle.setOutlineThickness(2);
     rectangle.setOutlineColor(sf::Color::Black);
-    rectangle.setPosition(this->tileset_params.rect_to_draw_on_map.x + this->tileset_params.offset.x,
-                          this->tileset_params.rect_to_draw_on_map.y + this->tileset_params.offset.y);
+    rectangle.setPosition(tileset_params.rect_to_draw_on_map.x + tileset_params.offset.x,
+                          tileset_params.rect_to_draw_on_map.y - tileset_params.rect_to_draw.y + tileset_params.offset.y);
     this->window.draw(rectangle);
 }
 
 void Editor::run() {
     //TODO: see RenderTexture for caching
-    tileset_params.pos.x = this->params.size.w - this->tileset.getSize().x;
+    tileset_params.pos.x = params.size.w - this->tileset.getSize().x;
     tileset_params.pos.y = 0;
     this->tileset.sprite.setPosition(tileset_params.pos.x, tileset_params.pos.y);
 
@@ -83,7 +83,7 @@ void Editor::run() {
         }
 
         // clear the window with black color
-        window.clear(sf::Color(240,226,182));
+        window.clear(sf::Color(240, 226, 182));
 
         window.draw(this->tileset.sprite);
         drawOverlayingShapes();
@@ -98,13 +98,28 @@ void Editor::run() {
 }
 
 void Editor::handleEvent(sf::Event e) {
+    status.update();
+
     switch(e.type) {
         case sf::Event::Closed:
             this->window.close();
             break;
 
         case sf::Event::MouseButtonPressed:
+            status.current_status = Status::DRAGGING;
             this->handleMouseInput(e);
+            break;
+
+        case sf::Event::MouseButtonReleased:
+            status.current_status = Status::NONE;
+            //std::cout << "Status None" << std::endl;
+            this->handleMouseInput(e);
+            break;
+
+        case sf::Event::MouseMoved:
+            if (status.current_status == Status::DRAGGING) {
+                this->handleMouseInput(e);
+            }
             break;
 
         case sf::Event::MouseWheelMoved:
@@ -121,11 +136,13 @@ void Editor::handleEvent(sf::Event e) {
 }
 
 void Editor::handleMouseInput(sf::Event e) {
-    sf::Vector2i mouse_pos = sf::Mouse::getPosition(this->window);
+    this->mouse_coord.old_coord = this->mouse_coord.new_coord;
+    this->mouse_coord.new_coord = sf::Mouse::getPosition(this->window);
     float new_offset = 0.0;
 
     // Tileset
-    if (Tools::isInRectangle(mouse_pos,
+    // TODO: take care of dragging inside to have a big rectangle selection
+    if (Tools::isInRectangle(this->mouse_coord.new_coord,
                              params.size.w - tileset_params.size.w, 0,
                              tileset_params.size.w, tileset_params.size.h)) {
 
@@ -160,43 +177,60 @@ void Editor::handleMouseInput(sf::Event e) {
 
         // Tile selection
         if(e.type == sf::Event::MouseButtonPressed) {
-            sf::Vector2i tileset_pos;
-            tileset_pos.x = mouse_pos.x - (params.size.w - tileset_params.size.w);
-            tileset_pos.y = mouse_pos.y;
+            // If you're dragging on the tileset, you want a bigger rectangle selection
+            if (this->status.sameAsLast() && this->status.current_status == Status::DRAGGING && mouseIsInNewTile(this->mouse_coord.old_coord, this->mouse_coord.new_coord)) {
+                sf::Vector2<int> old_top_left = Tools::getTopLeft(this->mouse_coord.old_coord, tileset_params.tile_size);
+                sf::Vector2<int> new_top_left = Tools::getTopLeft(this->mouse_coord.new_coord, tileset_params.tile_size);
 
-            // Convert to tile (divide by tilesize and truncate)
-            sf::Vector2i new_pos = Tools::getTopLeft(tileset_pos, tileset_params.tile_size);
+                //TODO: do lol
+            }
 
-            std::cout << new_pos.x << "/" << new_pos.y << std::endl;
+            // Selected a single tile
+            else {
+                sf::Vector2i tileset_pos;
+                tileset_pos.x = this->mouse_coord.new_coord.x - (params.size.w - tileset_params.size.w);
+                tileset_pos.y = this->mouse_coord.new_coord.y;
 
-            tileset_params.rect_to_draw_on_map.x = new_pos.x;
-            tileset_params.rect_to_draw_on_map.y = new_pos.y;
-            tileset_params.rect_to_draw_on_map.w = tileset_params.tile_size;
-            tileset_params.rect_to_draw_on_map.h = tileset_params.tile_size;
+                // Convert to tile (divide by tilesize and truncate)
+                sf::Vector2i new_pos = Tools::getTopLeft(tileset_pos, tileset_params.tile_size);
+
+                tileset_params.rect_to_draw_on_map.x = new_pos.x;
+                tileset_params.rect_to_draw_on_map.y = new_pos.y + this->tileset_params.rect_to_draw.y;
+                tileset_params.rect_to_draw_on_map.w = tileset_params.tile_size;
+                tileset_params.rect_to_draw_on_map.h = tileset_params.tile_size;
+            }
+
         }
     }
 
     // Map
-    else if (Tools::isInRectangle(mouse_pos,
+    else if (Tools::isInRectangle(this->mouse_coord.new_coord,
                                   0, 0,
                                   params.size.w - tileset_params.size.w, params.size.h)) {
 
+        // Regular click
         if(sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
-            sf::Vector2i new_pos = Tools::getTopLeft(mouse_pos, this->tileset_params.tile_size);
+            // Avoid endlessly resetting the same map tile to the same tileset tile
+            if (this->status.current_status == Status::DRAGGING && !mouseIsInNewTile(this->mouse_coord.old_coord, this->mouse_coord.new_coord)) {
+                return;
+            }
+
+            sf::Vector2<int> new_pos = Tools::getTopLeft(this->mouse_coord.new_coord, tileset_params.tile_size);
             Rectangle dest;
             dest.x = new_pos.x;
             dest.y = new_pos.y;
             dest.w = tileset_params.tile_size;
             dest.h = tileset_params.tile_size;
 
-            std::cout << dest.x << "/" << dest.y << " | " << dest.w << "/" << dest.h << std::endl;
-            std::cout << tileset_params.rect_to_draw_on_map.x << "/"
-                      << tileset_params.rect_to_draw_on_map.y << " | "
-                      << tileset_params.rect_to_draw_on_map.w << "/"
-                      << tileset_params.rect_to_draw_on_map.h << std::endl;
-
-            this->map.updateTile(dest, this->tileset_params.rect_to_draw_on_map);
+            this->map.updateTile(dest, tileset_params.rect_to_draw_on_map);
         }
 
     }
+}
+
+bool Editor::mouseIsInNewTile(sf::Vector2<int> old_coord, sf::Vector2<int> new_coord) {
+    sf::Vector2<int> old_top_left = Tools::getTopLeft(old_coord, tileset_params.tile_size);
+    sf::Vector2<int> new_top_left = Tools::getTopLeft(new_coord, tileset_params.tile_size);
+
+    return (old_top_left.x != new_top_left.x || old_top_left.y != new_top_left.y);
 }

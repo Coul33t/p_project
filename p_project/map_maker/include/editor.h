@@ -20,6 +20,30 @@
 #include "params.h"
 #include "constants.h"
 
+enum Status {NONE, DRAGGING};
+
+struct EditorStatus {
+    Status current_status, last_status;
+
+    EditorStatus() {
+        current_status = Status::NONE;
+        last_status = Status::NONE;
+    }
+
+    void update() {
+        this->last_status = current_status;
+    }
+
+    bool sameAsLast() {
+        return (this->last_status == this->current_status);
+    }
+};
+
+struct MouseCoord {
+    sf::Vector2<int> old_coord;
+    sf::Vector2<int> new_coord;
+};
+
 class Editor {
 public:
     Editor();
@@ -37,6 +61,7 @@ public:
     void handleEvent(sf::Event e);
     void handleMouseInput(sf::Event e);
 
+    bool mouseIsInNewTile(sf::Vector2<int> old_coord, sf::Vector2<int> new_coord);
 
     EditorParams params;
     TilesetParams tileset_params;
@@ -45,6 +70,8 @@ public:
 
     Map map;
     Sprite tileset;
+    EditorStatus status;
+    MouseCoord mouse_coord;
 };
 
 #endif //P_PROJECT_EDITOR_H

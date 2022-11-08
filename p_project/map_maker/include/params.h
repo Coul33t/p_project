@@ -28,7 +28,12 @@ struct TilesetParams {
     int tile_size;
     Rectangle rect_to_draw;
     Rectangle rect_to_draw_on_map;
+    sf::Vector2<int> selection_size;
     sf::Vector2<int> offset;
+
+    TilesetParams() {
+        selection_size = sf::Vector2<int>(1, 1);
+    }
 
     friend std::ostream& operator <<(std::ostream& os, const TilesetParams tp) {
         os << "Position: x = " << tp.pos.x << " / y = " << tp.pos.y << std::endl;
