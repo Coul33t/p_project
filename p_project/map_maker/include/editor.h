@@ -30,6 +30,8 @@ public:
     void open() const;
     void run();
 
+    void drawOverlayingShapes();
+
     bool loadTileset(const std::string& path);
 
     void handleEvent(sf::Event e);

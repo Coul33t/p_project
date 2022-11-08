@@ -17,7 +17,7 @@ void Editor::init(int w, int h, int tile_size) {
 }
 
 void Editor::initMap(int w, int h) {
-    this->map.init(w, h);
+    this->map.init(w, h, this->tileset.texture);
 }
 
 void Editor::open() const {
@@ -32,17 +32,39 @@ bool Editor::loadTileset(const std::string& path) {
         return false;
     }
 
+    this->map.tileset = tileset_text;
+
     this->tileset.setTexture(tileset_text);
 
     this->tileset_params.size.w = this->tileset.getSize().x;
     this->tileset_params.size.h = this->tileset.getSize().y;
 
+    // Set the upper-left tile as the first one selected
+    this->tileset_params.rect_to_draw_on_map.x = this->params.size.w - this->tileset_params.size.w;
+    this->tileset_params.rect_to_draw_on_map.y = 0;
+    this->tileset_params.rect_to_draw_on_map.w = this->tileset_params.tile_size;
+    this->tileset_params.rect_to_draw_on_map.h = this->tileset_params.tile_size;
+
     this->tileset_params.rect_to_draw.x = 0;
     this->tileset_params.rect_to_draw.y = 0;
-    this->tileset_params.rect_to_draw.w = this->tileset.getSize().x;
+    this->tileset_params.rect_to_draw.w = this->tileset_params.size.w;
     this->tileset_params.rect_to_draw.h = this->params.size.h;
 
+    this->tileset_params.offset.x = this->params.size.w - this->tileset_params.size.w;
+    this->tileset_params.offset.y = 0;
+
     return true;
+}
+
+void Editor::drawOverlayingShapes() {
+    // Draw the current selected tile
+    sf::RectangleShape rectangle(sf::Vector2f(this->tileset_params.tile_size, this->tileset_params.tile_size));
+    rectangle.setFillColor(sf::Color(0, 0, 0, 0));
+    rectangle.setOutlineThickness(2);
+    rectangle.setOutlineColor(sf::Color::Black);
+    rectangle.setPosition(this->tileset_params.rect_to_draw_on_map.x + this->tileset_params.offset.x,
+                          this->tileset_params.rect_to_draw_on_map.y + this->tileset_params.offset.y);
+    this->window.draw(rectangle);
 }
 
 void Editor::run() {
@@ -64,6 +86,7 @@ void Editor::run() {
         window.clear(sf::Color(240,226,182));
 
         window.draw(this->tileset.sprite);
+        drawOverlayingShapes();
         window.draw(this->map);
 
         // draw everything here...
@@ -139,18 +162,21 @@ void Editor::handleMouseInput(sf::Event e) {
         if(e.type == sf::Event::MouseButtonPressed) {
             sf::Vector2i tileset_pos;
             tileset_pos.x = mouse_pos.x - (params.size.w - tileset_params.size.w);
-            tileset_pos.y = tileset_params.rect_to_draw.y + mouse_pos.y;
+            tileset_pos.y = mouse_pos.y;
 
             // Convert to tile (divide by tilesize and truncate)
             sf::Vector2i new_pos = Tools::getTopLeft(tileset_pos, tileset_params.tile_size);
 
-            params.rect_to_draw.x = new_pos.x;
-            params.rect_to_draw.y = new_pos.y;
-            params.rect_to_draw.w = tileset_params.tile_size;
-            params.rect_to_draw.h = tileset_params.tile_size;
+            std::cout << new_pos.x << "/" << new_pos.y << std::endl;
+
+            tileset_params.rect_to_draw_on_map.x = new_pos.x;
+            tileset_params.rect_to_draw_on_map.y = new_pos.y;
+            tileset_params.rect_to_draw_on_map.w = tileset_params.tile_size;
+            tileset_params.rect_to_draw_on_map.h = tileset_params.tile_size;
         }
     }
 
+    // Map
     else if (Tools::isInRectangle(mouse_pos,
                                   0, 0,
                                   params.size.w - tileset_params.size.w, params.size.h)) {
@@ -160,10 +186,16 @@ void Editor::handleMouseInput(sf::Event e) {
             Rectangle dest;
             dest.x = new_pos.x;
             dest.y = new_pos.y;
-            dest.w = new_pos.x + tileset_params.tile_size;
-            dest.h = new_pos.y + tileset_params.tile_size;
+            dest.w = tileset_params.tile_size;
+            dest.h = tileset_params.tile_size;
 
-            this->map.updateTile(dest, params.rect_to_draw);
+            std::cout << dest.x << "/" << dest.y << " | " << dest.w << "/" << dest.h << std::endl;
+            std::cout << tileset_params.rect_to_draw_on_map.x << "/"
+                      << tileset_params.rect_to_draw_on_map.y << " | "
+                      << tileset_params.rect_to_draw_on_map.w << "/"
+                      << tileset_params.rect_to_draw_on_map.h << std::endl;
+
+            this->map.updateTile(dest, this->tileset_params.rect_to_draw_on_map);
         }
 
     }

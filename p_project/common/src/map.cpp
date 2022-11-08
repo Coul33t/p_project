@@ -8,11 +8,15 @@ Map::Map() {
 
 }
 
+Map::Map(sf::Texture& tileset_text) {
+    this->tileset = tileset_text;
+}
+
 Map::~Map() {
 
 }
 
-void Map::init(size_t x, size_t y) {
+void Map::init(size_t x, size_t y, sf::Texture& tileset_text) {
     for (size_t i = 0; i < x * y; i++) {
         this->tiles.emplace_back(Tile());
     }
@@ -20,7 +24,8 @@ void Map::init(size_t x, size_t y) {
     this->vertices_array.setPrimitiveType(sf::Quads);
     // *4 because quads
     this->vertices_array.resize(this->size.w * this->size.h * 4);
-    std::cout << "Init" << std::endl;
+
+    this->tileset = tileset_text;
 }
 
 void Map::updateTile(const Rectangle& pos, const Rectangle& text_pos) {
@@ -40,12 +45,10 @@ void Map::updateTile(const Rectangle& pos, const Rectangle& text_pos) {
         sf::VertexArray pos_va = pos.getRectAsPosVA();
         sf::VertexArray text_va = text_pos.getRectAsTextVA();
 
-        idx = this->vertices_array.getVertexCount();
-
-        this->vertices_array.append(sf::Vertex(pos_va[0].position, pos_va[0].texCoords));
-        this->vertices_array.append(sf::Vertex(pos_va[1].position, pos_va[1].texCoords));
-        this->vertices_array.append(sf::Vertex(pos_va[2].position, pos_va[2].texCoords));
-        this->vertices_array.append(sf::Vertex(pos_va[3].position, pos_va[3].texCoords));
+        this->vertices_array.append(sf::Vertex(pos_va[0].position, text_va[0].texCoords));
+        this->vertices_array.append(sf::Vertex(pos_va[1].position, text_va[1].texCoords));
+        this->vertices_array.append(sf::Vertex(pos_va[2].position, text_va[2].texCoords));
+        this->vertices_array.append(sf::Vertex(pos_va[3].position, text_va[3].texCoords));
     }
 }
 

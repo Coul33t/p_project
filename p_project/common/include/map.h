@@ -16,9 +16,10 @@
 class Map : public sf::Drawable, public sf::Transformable {
 public:
     Map();
+    Map(sf::Texture& tileset_text);
     ~Map();
 
-    void init(size_t x, size_t y);
+    void init(size_t x, size_t y, sf::Texture& tileset_text);
 
     void updateTile(const Rectangle& pos, const Rectangle& text_pos);
 
