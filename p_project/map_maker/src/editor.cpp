@@ -138,7 +138,6 @@ void Editor::handleEvent(sf::Event e) {
 void Editor::handleMouseInput(sf::Event e) {
     this->mouse_coord.old_coord = this->mouse_coord.new_coord;
     this->mouse_coord.new_coord = sf::Mouse::getPosition(this->window);
-    float new_offset = 0.0;
 
     // Tileset
     // TODO: take care of dragging inside to have a big rectangle selection
@@ -149,7 +148,7 @@ void Editor::handleMouseInput(sf::Event e) {
 
         // Tileset scrolling
         if (e.type == sf::Event::MouseWheelMoved) {
-            new_offset = e.mouseWheel.delta * params.scroll_speed;
+            float new_offset = e.mouseWheel.delta * params.scroll_speed;
 
 
             // If the y value is too high, set it to the max value (end of the tileset - height of the tileset)
@@ -183,6 +182,15 @@ void Editor::handleMouseInput(sf::Event e) {
                 sf::Vector2<int> new_top_left = Tools::getTopLeft(this->mouse_coord.new_coord, tileset_params.tile_size);
 
                 //TODO: do lol
+                // Algo:
+                // If new_x > old_x and new_y > old_y : change size of selection +1/+1 (easy case)
+                // If new_x > old_x and new_y == old_y : change size of selection +1/0 (easy case)
+                // If new_x == old_x and new_y > old_y : change size of selection 0/+1 (easy case)
+                // If new_x < old_x and new_y < old_y :  change size of selection +1/+1 AND Change origin -1/-1
+                // If new_x < old_x and new_y == old_y :  change size of selection +1/0 AND Change origin -1/0
+                // If new_x == old_x and new_y < old_y :  change size of selection 0/+1 AND Change origin 0/-1
+                // If new_x < old_x and new_y > old_y :  change size of selection +1/+1 AND Change origin -1/0
+                // If new_x > old_x and new_y < old_y :  change size of selection +1/+1 AND Change origin 0/-1
             }
 
             // Selected a single tile
@@ -228,7 +236,7 @@ void Editor::handleMouseInput(sf::Event e) {
     }
 }
 
-bool Editor::mouseIsInNewTile(sf::Vector2<int> old_coord, sf::Vector2<int> new_coord) {
+bool Editor::mouseIsInNewTile(sf::Vector2<int> old_coord, sf::Vector2<int> new_coord) const {
     sf::Vector2<int> old_top_left = Tools::getTopLeft(old_coord, tileset_params.tile_size);
     sf::Vector2<int> new_top_left = Tools::getTopLeft(new_coord, tileset_params.tile_size);
 

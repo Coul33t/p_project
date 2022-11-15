@@ -61,7 +61,7 @@ public:
     void handleEvent(sf::Event e);
     void handleMouseInput(sf::Event e);
 
-    bool mouseIsInNewTile(sf::Vector2<int> old_coord, sf::Vector2<int> new_coord);
+    bool mouseIsInNewTile(sf::Vector2<int> old_coord, sf::Vector2<int> new_coord) const;
 
     EditorParams params;
     TilesetParams tileset_params;
