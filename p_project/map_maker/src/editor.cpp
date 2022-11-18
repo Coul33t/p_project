@@ -17,7 +17,7 @@ void Editor::init(int w, int h, int tile_size) {
 }
 
 void Editor::initMap(int w, int h) {
-    this->map.init(w, h, this->tileset.texture);
+    map.init(w, h, tileset.texture);
 }
 
 void Editor::open() const {
@@ -32,12 +32,12 @@ bool Editor::loadTileset(const std::string& path) {
         return false;
     }
 
-    this->map.tileset = tileset_text;
+    map.tileset = tileset_text;
 
-    this->tileset.setTexture(tileset_text);
+    tileset.setTexture(tileset_text);
 
-    tileset_params.size.w = this->tileset.getSize().x;
-    tileset_params.size.h = this->tileset.getSize().y;
+    tileset_params.size.w = tileset.getSize().x;
+    tileset_params.size.h = tileset.getSize().y;
 
     // Set the upper-left tile as the first one selected
     tileset_params.rect_to_draw_on_map.x = params.size.w - tileset_params.size.w;
@@ -45,10 +45,10 @@ bool Editor::loadTileset(const std::string& path) {
     tileset_params.rect_to_draw_on_map.w = tileset_params.tile_size;
     tileset_params.rect_to_draw_on_map.h = tileset_params.tile_size;
 
-    tileset_params.rect_to_draw.x = 0;
-    tileset_params.rect_to_draw.y = 0;
-    tileset_params.rect_to_draw.w = tileset_params.size.w;
-    tileset_params.rect_to_draw.h = params.size.h;
+    tileset_params.tileset_part_to_draw.x = 0;
+    tileset_params.tileset_part_to_draw.y = 0;
+    tileset_params.tileset_part_to_draw.w = tileset_params.size.w;
+    tileset_params.tileset_part_to_draw.h = params.size.h;
 
     tileset_params.offset.x = params.size.w - tileset_params.size.w;
     tileset_params.offset.y = 0;
@@ -58,12 +58,14 @@ bool Editor::loadTileset(const std::string& path) {
 
 void Editor::drawOverlayingShapes() {
     // Draw the current selected tile
-    sf::RectangleShape rectangle(sf::Vector2f(tileset_params.tile_size, tileset_params.tile_size));
+    sf::RectangleShape rectangle(sf::Vector2f(tileset_params.tile_size * this->tileset_params.selection_size.x,
+                                              tileset_params.tile_size * this->tileset_params.selection_size.y));
+
     rectangle.setFillColor(sf::Color(0, 0, 0, 0));
     rectangle.setOutlineThickness(2);
     rectangle.setOutlineColor(sf::Color::Black);
     rectangle.setPosition(tileset_params.rect_to_draw_on_map.x + tileset_params.offset.x,
-                          tileset_params.rect_to_draw_on_map.y - tileset_params.rect_to_draw.y + tileset_params.offset.y);
+                          tileset_params.rect_to_draw_on_map.y - tileset_params.tileset_part_to_draw.y + tileset_params.offset.y);
     this->window.draw(rectangle);
 }
 
@@ -82,15 +84,15 @@ void Editor::run() {
 
         }
 
-        // clear the window with black color
+        // clear the window with cream color
         window.clear(sf::Color(240, 226, 182));
 
-        window.draw(this->tileset.sprite);
-        drawOverlayingShapes();
+
         window.draw(this->map);
 
-        // draw everything here...
-        // window.draw(...);
+        window.draw(this->tileset.getRectShape(tileset_params.pos.x, tileset_params.pos.y, sf::Color(240, 226, 182)));
+        window.draw(this->tileset.sprite);
+        drawOverlayingShapes();
 
         // end the current frame
         window.display();
@@ -135,7 +137,7 @@ void Editor::handleEvent(sf::Event e) {
     }
 }
 
-void Editor::handleMouseInput(sf::Event e) {
+void Editor::handleMouseInput(sf::Event& e) {
     this->mouse_coord.old_coord = this->mouse_coord.new_coord;
     this->mouse_coord.new_coord = sf::Mouse::getPosition(this->window);
 
@@ -145,95 +147,157 @@ void Editor::handleMouseInput(sf::Event e) {
                              params.size.w - tileset_params.size.w, 0,
                              tileset_params.size.w, tileset_params.size.h)) {
 
-
         // Tileset scrolling
         if (e.type == sf::Event::MouseWheelMoved) {
-            float new_offset = e.mouseWheel.delta * params.scroll_speed;
-
-
-            // If the y value is too high, set it to the max value (end of the tileset - height of the tileset)
-            if (tileset_params.rect_to_draw.y - (new_offset * tileset_params.tile_size)
-                > tileset_params.size.h - params.size.h) {
-                tileset_params.rect_to_draw.y = tileset_params.size.h - params.size.h;
-            }
-
-                // If too low, set it to 0 (beginning of the tileset)
-            else if (tileset_params.rect_to_draw.y - (new_offset * tileset_params.tile_size) < 0) {
-                tileset_params.rect_to_draw.y = 0;
-            }
-
-                // Regular scolling
-            else {
-                // Minus, because a bottom scrolling (negative offset) == y value increasing
-                tileset_params.rect_to_draw.y -= new_offset * tileset_params.tile_size;
-            }
-
-            this->tileset.sprite.setTextureRect(sf::IntRect(tileset_params.rect_to_draw.x,
-                                                            tileset_params.rect_to_draw.y,
-                                                            tileset_params.rect_to_draw.w,
-                                                            tileset_params.rect_to_draw.h));
+            handleTilesetScrolling(e);
         }
 
-        // Tile selection
+        // Single tile selection
         if(e.type == sf::Event::MouseButtonPressed) {
+            handleTileSelection();
+        }
+
+        // Dragging on the selection
+        if(sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
+            // TODO: use to get back into already dragged selection rectangle
+            origin_of_drag = mouse_coord;
             // If you're dragging on the tileset, you want a bigger rectangle selection
-            if (this->status.sameAsLast() && this->status.current_status == Status::DRAGGING && mouseIsInNewTile(this->mouse_coord.old_coord, this->mouse_coord.new_coord)) {
-                sf::Vector2<int> old_top_left = Tools::getTopLeft(this->mouse_coord.old_coord, tileset_params.tile_size);
-                sf::Vector2<int> new_top_left = Tools::getTopLeft(this->mouse_coord.new_coord, tileset_params.tile_size);
-
-                //TODO: do lol
-                // Algo:
-                // If new_x > old_x and new_y > old_y : change size of selection +1/+1 (easy case)
-                // If new_x > old_x and new_y == old_y : change size of selection +1/0 (easy case)
-                // If new_x == old_x and new_y > old_y : change size of selection 0/+1 (easy case)
-                // If new_x < old_x and new_y < old_y :  change size of selection +1/+1 AND Change origin -1/-1
-                // If new_x < old_x and new_y == old_y :  change size of selection +1/0 AND Change origin -1/0
-                // If new_x == old_x and new_y < old_y :  change size of selection 0/+1 AND Change origin 0/-1
-                // If new_x < old_x and new_y > old_y :  change size of selection +1/+1 AND Change origin -1/0
-                // If new_x > old_x and new_y < old_y :  change size of selection +1/+1 AND Change origin 0/-1
+            if (this->status.sameAsLast()
+                && this->status.current_status == Status::DRAGGING
+                && mouseIsInNewTile(this->mouse_coord.old_coord, this->mouse_coord.new_coord)) {
+                handleTilesetDragging();
             }
-
-            // Selected a single tile
-            else {
-                sf::Vector2i tileset_pos;
-                tileset_pos.x = this->mouse_coord.new_coord.x - (params.size.w - tileset_params.size.w);
-                tileset_pos.y = this->mouse_coord.new_coord.y;
-
-                // Convert to tile (divide by tilesize and truncate)
-                sf::Vector2i new_pos = Tools::getTopLeft(tileset_pos, tileset_params.tile_size);
-
-                tileset_params.rect_to_draw_on_map.x = new_pos.x;
-                tileset_params.rect_to_draw_on_map.y = new_pos.y + this->tileset_params.rect_to_draw.y;
-                tileset_params.rect_to_draw_on_map.w = tileset_params.tile_size;
-                tileset_params.rect_to_draw_on_map.h = tileset_params.tile_size;
-            }
-
         }
     }
 
     // Map
-    else if (Tools::isInRectangle(this->mouse_coord.new_coord,
-                                  0, 0,
+    else if (Tools::isInRectangle(this->mouse_coord.new_coord, 0, 0,
                                   params.size.w - tileset_params.size.w, params.size.h)) {
 
-        // Regular click
+        // Regular click or dragging
         if(sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
-            // Avoid endlessly resetting the same map tile to the same tileset tile
-            if (this->status.current_status == Status::DRAGGING && !mouseIsInNewTile(this->mouse_coord.old_coord, this->mouse_coord.new_coord)) {
-                return;
-            }
-
-            sf::Vector2<int> new_pos = Tools::getTopLeft(this->mouse_coord.new_coord, tileset_params.tile_size);
-            Rectangle dest;
-            dest.x = new_pos.x;
-            dest.y = new_pos.y;
-            dest.w = tileset_params.tile_size;
-            dest.h = tileset_params.tile_size;
-
-            this->map.updateTile(dest, tileset_params.rect_to_draw_on_map);
+            handleMapLeftClick();
         }
-
     }
+}
+
+void Editor::handleTilesetScrolling(sf::Event& e) {
+    float new_offset = e.mouseWheel.delta * params.scroll_speed;
+
+
+    // If the y value is too high, set it to the max value (end of the tileset - height of the tileset)
+    if (tileset_params.tileset_part_to_draw.y - (new_offset * tileset_params.tile_size)
+        > tileset_params.size.h - params.size.h) {
+        tileset_params.tileset_part_to_draw.y = tileset_params.size.h - params.size.h;
+    }
+
+        // If too low, set it to 0 (beginning of the tileset)
+    else if (tileset_params.tileset_part_to_draw.y - (new_offset * tileset_params.tile_size) < 0) {
+        tileset_params.tileset_part_to_draw.y = 0;
+    }
+
+        // Regular scolling
+    else {
+        // Minus, because a bottom scrolling (negative offset) == y value increasing
+        tileset_params.tileset_part_to_draw.y -= new_offset * tileset_params.tile_size;
+    }
+
+    this->tileset.sprite.setTextureRect(sf::IntRect(tileset_params.tileset_part_to_draw.x,
+                                                    tileset_params.tileset_part_to_draw.y,
+                                                    tileset_params.tileset_part_to_draw.w,
+                                                    tileset_params.tileset_part_to_draw.h));
+}
+
+void Editor::handleTileSelection() {
+    sf::Vector2i tileset_pos;
+    tileset_pos.x = this->mouse_coord.new_coord.x - (params.size.w - tileset_params.size.w);
+    tileset_pos.y = this->mouse_coord.new_coord.y;
+
+    // Convert to tile (divide by tilesize and truncate)
+    sf::Vector2i new_pos = Tools::getTopLeft(tileset_pos, tileset_params.tile_size);
+
+    tileset_params.rect_to_draw_on_map.x = new_pos.x;
+    tileset_params.rect_to_draw_on_map.y = new_pos.y + this->tileset_params.tileset_part_to_draw.y;
+    tileset_params.rect_to_draw_on_map.w = tileset_params.tile_size;
+    tileset_params.rect_to_draw_on_map.h = tileset_params.tile_size;
+
+    tileset_params.selection_size.x = 1;
+    tileset_params.selection_size.y = 1;
+}
+
+void Editor::handleTilesetDragging() {
+    sf::Vector2<int> old_top_left = Tools::getTopLeft(this->mouse_coord.old_coord, tileset_params.tile_size);
+    sf::Vector2<int> new_top_left = Tools::getTopLeft(this->mouse_coord.new_coord, tileset_params.tile_size);
+
+    //TODO: check if mouse is going back into selection
+
+    // If new_x > old_x and new_y > old_y : change size of selection +1/+1 (easy case)
+    if (new_top_left.x > old_top_left.x && new_top_left.y > old_top_left.y) {
+        this->tileset_params.selection_size.x += 1;
+        this->tileset_params.selection_size.y += 1;
+    }
+
+    // If new_x > old_x and new_y == old_y : change size of selection +1/0 (easy case)
+    else if (new_top_left.x > old_top_left.x && new_top_left.y == old_top_left.y) {
+        this->tileset_params.selection_size.x += 1;
+    }
+
+    // If new_x == old_x and new_y > old_y : change size of selection 0/+1 (easy case)
+    else if (new_top_left.x == old_top_left.x && new_top_left.y > old_top_left.y) {
+        this->tileset_params.selection_size.y += 1;
+    }
+
+    // If new_x < old_x and new_y < old_y : change size of selection +1/+1 AND Change origin -1/-1
+    else if (new_top_left.x < old_top_left.x && new_top_left.y < old_top_left.y) {
+        this->tileset_params.selection_size.x += 1;
+        this->tileset_params.selection_size.y += 1;
+        this->tileset_params.rect_to_draw_on_map.x -= tileset_params.tile_size;
+        this->tileset_params.rect_to_draw_on_map.y -= tileset_params.tile_size;
+    }
+
+    // If new_x < old_x and new_y == old_y :  change size of selection +1/0 AND Change origin -1/0
+    else if (new_top_left.x < old_top_left.x && new_top_left.y == old_top_left.y) {
+        this->tileset_params.selection_size.x += 1;
+        this->tileset_params.rect_to_draw_on_map.x -= tileset_params.tile_size;
+    }
+
+    // If new_x == old_x and new_y < old_y :  change size of selection 0/+1 AND Change origin 0/-1
+    else if (new_top_left.x == old_top_left.x && new_top_left.y < old_top_left.y) {
+        this->tileset_params.selection_size.y += 1;
+        this->tileset_params.rect_to_draw_on_map.y -= tileset_params.tile_size;
+    }
+
+    // If new_x < old_x and new_y > old_y :  change size of selection +1/+1 AND Change origin -1/0
+    else if (new_top_left.x < old_top_left.x && new_top_left.y > old_top_left.y) {
+        this->tileset_params.selection_size.x += 1;
+        this->tileset_params.selection_size.y += 1;
+        this->tileset_params.rect_to_draw_on_map.x -= tileset_params.tile_size;
+    }
+
+    // If new_x > old_x and new_y < old_y :  change size of selection +1/+1 AND Change origin 0/-1
+    else if (new_top_left.x > old_top_left.x && new_top_left.y < old_top_left.y) {
+        this->tileset_params.selection_size.x += 1;
+        this->tileset_params.selection_size.y += 1;
+        this->tileset_params.rect_to_draw_on_map.y -= tileset_params.tile_size;
+    }
+
+    tileset_params.rect_to_draw_on_map.w = tileset_params.tile_size * tileset_params.selection_size.x;
+    tileset_params.rect_to_draw_on_map.h = tileset_params.tile_size * tileset_params.selection_size.y;
+}
+
+void Editor::handleMapLeftClick() {
+    // Avoid endlessly resetting the same map tile to the same tileset tile
+    if (this->status.current_status == Status::DRAGGING && !mouseIsInNewTile(this->mouse_coord.old_coord, this->mouse_coord.new_coord)) {
+        return;
+    }
+
+    sf::Vector2<int> new_pos = Tools::getTopLeft(this->mouse_coord.new_coord, tileset_params.tile_size);
+
+    Rectangle dest(new_pos.x, new_pos.y,
+                   tileset_params.tile_size * tileset_params.selection_size.x,
+                   tileset_params.tile_size * tileset_params.selection_size.y);
+
+    this->map.updateTiles(dest, tileset_params.rect_to_draw_on_map, tileset_params.tile_size);
 }
 
 bool Editor::mouseIsInNewTile(sf::Vector2<int> old_coord, sf::Vector2<int> new_coord) const {

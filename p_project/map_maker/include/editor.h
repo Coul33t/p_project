@@ -34,7 +34,7 @@ struct EditorStatus {
         this->last_status = current_status;
     }
 
-    bool sameAsLast() {
+    bool sameAsLast() const {
         return (this->last_status == this->current_status);
     }
 };
@@ -59,9 +59,17 @@ public:
     bool loadTileset(const std::string& path);
 
     void handleEvent(sf::Event e);
-    void handleMouseInput(sf::Event e);
+    void handleMouseInput(sf::Event& e);
+
+    void handleTilesetScrolling(sf::Event& e);
+    void handleTileSelection();
+    void handleTilesetDragging();
+
+    void handleMapLeftClick();
 
     bool mouseIsInNewTile(sf::Vector2<int> old_coord, sf::Vector2<int> new_coord) const;
+
+
 
     EditorParams params;
     TilesetParams tileset_params;
@@ -72,6 +80,7 @@ public:
     Sprite tileset;
     EditorStatus status;
     MouseCoord mouse_coord;
+    MouseCoord origin_of_drag;
 };
 
 #endif //P_PROJECT_EDITOR_H

@@ -21,7 +21,7 @@ public:
 
     void init(size_t x, size_t y, sf::Texture& tileset_text);
 
-    void updateTile(const Rectangle& pos, const Rectangle& text_pos);
+    void updateTiles(const Rectangle& pos, const Rectangle& text_pos, size_t tilesize);
 
     int quadIdx(const sf::VertexArray& quad);
 

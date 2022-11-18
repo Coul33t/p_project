@@ -26,5 +26,12 @@ struct Sprite {
     sf::Vector2u getSize() const {
         return this->texture.getSize();
     }
+
+    sf::RectangleShape getRectShape(float x = 0, float y = 0, sf::Color color = sf::Color::Black) const {
+        sf::RectangleShape rect(sf::Vector2f(this->texture.getSize()));
+        rect.setPosition(x, y);
+        rect.setFillColor(color);
+        return rect;
+    }
 };
 #endif //P_PROJECT_SPRITE_H

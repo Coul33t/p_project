@@ -24,4 +24,24 @@ namespace Tools {
     size_t TransformCoord(sf::Vector2<int> coord, size_t col) {
         return ((coord.y * col) + coord.x);
     }
+
+    sf::VertexArray getRectAsPosVA(const Rectangle& rect) {
+        sf::VertexArray va(sf::Quads, 4);
+        va[0].position = sf::Vector2f(rect.x, rect.y);
+        va[1].position = sf::Vector2f(rect.x2, rect.y);
+        va[2].position = sf::Vector2f(rect.x2, rect.y2);
+        va[3].position = sf::Vector2f(rect.x, rect.y2);
+
+        return va;
+    }
+
+    sf::VertexArray getRectAsTextVA(const Rectangle& rect) {
+        sf::VertexArray va(sf::Quads, 4);
+        va[0].texCoords = sf::Vector2f(rect.x, rect.y);
+        va[1].texCoords = sf::Vector2f(rect.x2, rect.y);
+        va[2].texCoords = sf::Vector2f(rect.x2, rect.y2);
+        va[3].texCoords = sf::Vector2f(rect.x, rect.y2);
+
+        return va;
+    }
 }

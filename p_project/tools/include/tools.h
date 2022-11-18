@@ -49,11 +49,24 @@ struct Rectangle {
         rect.height = h;
     }
 
+    Rectangle(const Rectangle& other_rect) {
+        x = other_rect.x;
+        y = other_rect.y;
+        w = other_rect.w;
+        h = other_rect.h;
+        x2 = other_rect.x2;
+        y2 = other_rect.y2;
+        rect.left = other_rect.rect.left;
+        rect.top = other_rect.rect.top;
+        rect.width = other_rect.rect.width;
+        rect.height = other_rect.rect.height;
+    }
+
     sf::Rect<int>& getSFMLRect() {
         return this->rect;
     }
 
-    const sf::VertexArray getRectAsPosVA() const {
+    sf::VertexArray getRectAsPosVA() const {
         sf::VertexArray va(sf::Quads, 4);
         va[0].position = sf::Vector2f(x, y);
         va[1].position = sf::Vector2f(x + w, y);
@@ -63,7 +76,7 @@ struct Rectangle {
         return va;
     }
 
-    const sf::VertexArray getRectAsTextVA() const {
+    sf::VertexArray getRectAsTextVA() const {
         sf::VertexArray va(sf::Quads, 4);
         va[0].texCoords = sf::Vector2f(x, y);
         va[1].texCoords = sf::Vector2f(x + w, y);
@@ -79,6 +92,8 @@ namespace Tools {
     sf::Vector2<int> getTopLeft(sf::Vector2<int> original_coord, int tile_size);
     size_t TransformCoord(int x, int y, size_t col);
     size_t TransformCoord(sf::Vector2<int> coord, size_t col);
+    sf::VertexArray getRectAsPosVA(const Rectangle& rect);
+    sf::VertexArray getRectAsTextVA(const Rectangle& rect);
 }
 
 

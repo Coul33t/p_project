@@ -28,27 +28,35 @@ void Map::init(size_t x, size_t y, sf::Texture& tileset_text) {
     this->tileset = tileset_text;
 }
 
-void Map::updateTile(const Rectangle& pos, const Rectangle& text_pos) {
-    int idx = quadIdx(pos.getRectAsPosVA());
+void Map::updateTiles(const Rectangle& pos, const Rectangle& text_pos, size_t tilesize) {
 
-    // If the vertex has been found, just update its texture coordinates
-    if(idx != -1) {
-        sf::VertexArray text_va = text_pos.getRectAsTextVA();
-        this->vertices_array[idx].texCoords = text_va[0].texCoords;
-        this->vertices_array[idx + 1].texCoords = text_va[1].texCoords;
-        this->vertices_array[idx + 2].texCoords = text_va[2].texCoords;
-        this->vertices_array[idx + 3].texCoords = text_va[3].texCoords;
-    }
+    for (size_t i = 0; i < pos.w; i += tilesize) {
+        for (size_t j = 0; j < pos.h; j += tilesize) {
+            Rectangle pos_subrect(pos.x + i, pos.y + j,tilesize, tilesize);
+            Rectangle text_rect(text_pos.x + i, text_pos.y + j, tilesize, tilesize);
 
-    // Else, add it to the vertices list
-    else {
-        sf::VertexArray pos_va = pos.getRectAsPosVA();
-        sf::VertexArray text_va = text_pos.getRectAsTextVA();
+            int idx = quadIdx(Tools::getRectAsPosVA(pos_subrect));
 
-        this->vertices_array.append(sf::Vertex(pos_va[0].position, text_va[0].texCoords));
-        this->vertices_array.append(sf::Vertex(pos_va[1].position, text_va[1].texCoords));
-        this->vertices_array.append(sf::Vertex(pos_va[2].position, text_va[2].texCoords));
-        this->vertices_array.append(sf::Vertex(pos_va[3].position, text_va[3].texCoords));
+            // If the vertex has been found, only update its texture coordinates
+            if(idx != -1) {
+                sf::VertexArray text_va = text_rect.getRectAsTextVA();
+                this->vertices_array[idx].texCoords = text_va[0].texCoords;
+                this->vertices_array[idx + 1].texCoords = text_va[1].texCoords;
+                this->vertices_array[idx + 2].texCoords = text_va[2].texCoords;
+                this->vertices_array[idx + 3].texCoords = text_va[3].texCoords;
+            }
+
+                // Else, add it to the vertices list
+            else {
+                sf::VertexArray pos_va = pos_subrect.getRectAsPosVA();
+                sf::VertexArray text_va = text_rect.getRectAsTextVA();
+
+                this->vertices_array.append(sf::Vertex(pos_va[0].position, text_va[0].texCoords));
+                this->vertices_array.append(sf::Vertex(pos_va[1].position, text_va[1].texCoords));
+                this->vertices_array.append(sf::Vertex(pos_va[2].position, text_va[2].texCoords));
+                this->vertices_array.append(sf::Vertex(pos_va[3].position, text_va[3].texCoords));
+            }
+        }
     }
 }
 

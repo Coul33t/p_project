@@ -26,8 +26,8 @@ struct TilesetParams {
     Size size;
     sf::Vector2<int> pos;
     int tile_size;
-    Rectangle rect_to_draw;
-    Rectangle rect_to_draw_on_map;
+    Rectangle tileset_part_to_draw; // Size of the rectangle to draw
+    Rectangle rect_to_draw_on_map; // Rectangle on the tileset
     sf::Vector2<int> selection_size;
     sf::Vector2<int> offset;
 
@@ -39,8 +39,8 @@ struct TilesetParams {
         os << "Position: x = " << tp.pos.x << " / y = " << tp.pos.y << std::endl;
         os << "Size: w = " << tp.size.w << " / h = " << tp.size.h << std::endl;
         os << "Tile size: " << tp.tile_size << std::endl;
-        os << "Rectangle to draw: x = " << tp.rect_to_draw.x << " / y = " << tp.rect_to_draw.y << std::endl;
-        os << "                   w = " << tp.rect_to_draw.w << " / h = " << tp.rect_to_draw.h << std::endl;
+        os << "Tileset part to draw: x = " << tp.tileset_part_to_draw.x << " / y = " << tp.tileset_part_to_draw.y << std::endl;
+        os << "                      w = " << tp.tileset_part_to_draw.w << " / h = " << tp.tileset_part_to_draw.h << std::endl;
 
         return os;
     }
