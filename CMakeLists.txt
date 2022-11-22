@@ -59,7 +59,7 @@ file(GLOB all_SRCS
         "${ACTUAL_SOURCE_DIR}/tools/src/*.c"
 )
 
-add_executable(p_project p_project/main.cpp ${all_SRCS})
+add_executable(p_project p_project/main.cpp ${all_SRCS} p_project/common/include/common_constants.h)
 
 target_compile_features(p_project PRIVATE cxx_std_17)
 target_link_libraries(p_project sfml-window sfml-graphics sfml-system)

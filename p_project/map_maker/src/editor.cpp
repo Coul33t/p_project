@@ -56,6 +56,10 @@ bool Editor::loadTileset(const std::string& path) {
     return true;
 }
 
+void Editor::drawInterface() {
+
+}
+
 void Editor::drawOverlayingShapes() {
     // Draw the current selected tile
     sf::RectangleShape rectangle(sf::Vector2f(tileset_params.tile_size * this->tileset_params.selection_size.x,
@@ -102,38 +106,40 @@ void Editor::run() {
 void Editor::handleEvent(sf::Event e) {
     status.update();
 
-    switch(e.type) {
-        case sf::Event::Closed:
-            this->window.close();
-            break;
+    if (e.type == sf::Event::Closed) {
+        this->window.close();
+    }
 
-        case sf::Event::MouseButtonPressed:
+    else if(Tools::isIn(e.type, MOUSE_EVENTS)) {
+        bool handle = false;
+
+        if (e.type == sf::Event::MouseButtonPressed) {
             status.current_status = Status::DRAGGING;
-            this->handleMouseInput(e);
-            break;
+            handle = true;
+        }
 
-        case sf::Event::MouseButtonReleased:
+        else if (e.type == sf::Event::MouseButtonReleased) {
             status.current_status = Status::NONE;
-            //std::cout << "Status None" << std::endl;
-            this->handleMouseInput(e);
-            break;
+            handle = true;
+        }
 
-        case sf::Event::MouseMoved:
+        else if (e.type == sf::Event::MouseWheelMoved) {
+            handle = true;
+        }
+
+        else if (e.type == sf::Event::MouseMoved) {
             if (status.current_status == Status::DRAGGING) {
-                this->handleMouseInput(e);
+                handle = true;
             }
-            break;
+        }
 
-        case sf::Event::MouseWheelMoved:
+        if (handle) {
             this->handleMouseInput(e);
-            break;
+        }
+    }
 
-        case sf::Event::KeyPressed:
-            //this->handleInput();
-            break;
+    else if(Tools::isIn(e.type, KEY_EVENTS)) {
 
-        default:
-            break;
     }
 }
 

@@ -18,7 +18,8 @@
 #include "../../tools/include/tools.h"
 #include "../../common/include/sprite.h"
 #include "params.h"
-#include "constants.h"
+#include "editor_constants.h"
+#include "../../common/include/common_constants.h"
 
 enum Status {NONE, DRAGGING};
 
@@ -54,6 +55,7 @@ public:
     void open() const;
     void run();
 
+    void drawInterface();
     void drawOverlayingShapes();
 
     bool loadTileset(const std::string& path);

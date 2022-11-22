@@ -94,6 +94,11 @@ namespace Tools {
     size_t TransformCoord(sf::Vector2<int> coord, size_t col);
     sf::VertexArray getRectAsPosVA(const Rectangle& rect);
     sf::VertexArray getRectAsTextVA(const Rectangle& rect);
+
+    template <class T>
+    bool isIn(T to_find, std::vector<T> vec) {
+        return (std::find(vec.begin(), vec.end(), to_find) != std::end(vec));
+    }
 }
 
 

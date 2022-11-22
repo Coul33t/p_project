@@ -11,12 +11,14 @@ struct EditorParams {
     Size size;
     int scroll_speed = 4;
     Rectangle rect_to_draw;
+    int current_drawing_layer = 0;
 
     friend std::ostream& operator <<(std::ostream& os, const EditorParams ep) {
         os << "Size: w = " << ep.size.w << " / h = " << ep.size.h << std::endl;
         os << "Scroll speed: " << ep.scroll_speed << std::endl;
         os << "Rectangle to draw: x = " << ep.rect_to_draw.x << " / y = " << ep.rect_to_draw.y << std::endl;
         os << "                   w = " << ep.rect_to_draw.w << " / h = " << ep.rect_to_draw.h << std::endl;
+        os << "Current drawing layer: " << ep.current_drawing_layer << std::endl;
 
         return os;
     }
@@ -26,8 +28,8 @@ struct TilesetParams {
     Size size;
     sf::Vector2<int> pos;
     int tile_size;
-    Rectangle tileset_part_to_draw; // Size of the rectangle to draw
-    Rectangle rect_to_draw_on_map; // Rectangle on the tileset
+    Rectangle tileset_part_to_draw; // Part of the tileset to draw on the right of the screen
+    Rectangle rect_to_draw_on_map; // Rectangle on the tileset to draw on the map
     sf::Vector2<int> selection_size;
     sf::Vector2<int> offset;
 
