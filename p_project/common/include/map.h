@@ -25,6 +25,8 @@ public:
 
     int quadIdx(const sf::VertexArray& quad);
 
+    void serialise();
+
     std::vector<Tile> tiles;
     sf::VertexArray vertices_array;
     sf::Texture tileset;

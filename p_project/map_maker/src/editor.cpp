@@ -139,7 +139,7 @@ void Editor::handleEvent(sf::Event e) {
     }
 
     else if(Tools::isIn(e.type, KEY_EVENTS)) {
-
+        this->map.serialise();
     }
 }
 

@@ -2,3 +2,6 @@ bin/*
 build/*
 cmake-build-debug/
 .idea/
+
+extlib/cereal-1.3.2/*
+!extlib/cereal-1.3.2/include/

@@ -8,15 +8,16 @@
 #include <vector>
 #include <SFML/Window.hpp>
 
-std::vector<sf::Event::EventType> MOUSE_EVENTS =
+const std::vector<sf::Event::EventType> MOUSE_EVENTS =
         {sf::Event::MouseButtonPressed,
          sf::Event::MouseButtonReleased,
          sf::Event::MouseMoved,
          sf::Event::MouseWheelMoved};
 
-std::vector<sf::Event::EventType> KEY_EVENTS =
+const std::vector<sf::Event::EventType> KEY_EVENTS =
         {sf::Event::KeyPressed};
 
-std::vector<sf::Keyboard::Key> NUMPAD_KEYS =
+const std::vector<sf::Keyboard::Key> NUMPAD_KEYS =
         {sf::Keyboard::Numpad0};
+
 #endif //P_PROJECT_COMMON_CONSTANTS_H
