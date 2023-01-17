@@ -14,6 +14,8 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/System.hpp>
 
+#include "../../../extlib/cereal-1.3.2/include/cereal/archives/xml.hpp"
+
 #include "../../common/include/map.h"
 #include "../../tools/include/tools.h"
 #include "../../common/include/sprite.h"

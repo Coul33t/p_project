@@ -12,6 +12,7 @@ if (UNIX)
     find_package(SFML COMPONENTS graphics window system REQUIRED)
 endif()
 
+INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/extlib/cereal-1.3.2/include)
 if (WIN32)
     message("Windows detected. Fetching library from Github.")
     include(FetchContent)

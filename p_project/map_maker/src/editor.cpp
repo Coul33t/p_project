@@ -139,7 +139,13 @@ void Editor::handleEvent(sf::Event e) {
     }
 
     else if(Tools::isIn(e.type, KEY_EVENTS)) {
-        this->map.serialise();
+        std::ofstream ss("out.xml");
+
+        {
+            cereal::XMLOutputArchive oarchive(ss); // Create an output archive
+
+            oarchive(cereal::make_nvp("map", this->map)); // Write the data to the archive
+        } // archive goes out of scope, ensuring all contents are flushed
     }
 }
 

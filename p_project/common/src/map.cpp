@@ -74,14 +74,6 @@ int Map::quadIdx(const sf::VertexArray& quad) {
     return -1;
 }
 
-void Map::serialise() {
-    for (size_t i = 0; i < this->vertices_array.getVertexCount(); i++) {
-        std::cout << "Position : (" << this->vertices_array[i].position.x << ", " << this->vertices_array[i].position.y << ")" << std::endl;
-        std::cout << "Colour   : " << this->vertices_array[i].color.toInteger() << std::endl;
-        std::cout << "TextCoord: (" << this->vertices_array[i].texCoords.x << ", " << this->vertices_array[i].texCoords.y << ")" << std::endl;
-    }
-}
-
 void Map::draw(sf::RenderTarget& target, sf::RenderStates states) const {
     states.transform *= getTransform();
     states.texture = &(this->tileset);

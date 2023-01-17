@@ -10,6 +10,8 @@
 #include <SFML/System.hpp>
 #include <SFML/Graphics.hpp>
 
+#include "../../../extlib/cereal-1.3.2/include/cereal/archives/xml.hpp"
+
 #define FULL_LOCATION "[" << __FILE__ << " | " << __FUNCTION__ << " | l." << __LINE__ << "]" << std::endl
 
 struct Size {
@@ -21,6 +23,12 @@ struct Size {
     }
 
     Size(int h, int w): h(h), w(w) {}
+
+    template <class Archive>
+    void serialize(Archive & archive) {
+        archive & w;
+        archive & h;
+    }
 };
 
 struct Position {
@@ -87,6 +95,22 @@ struct Rectangle {
     }
 };
 
+struct VertexStruct {
+    float pos_x, pos_y, texCoords_x, texCoords_y;
+    uint32_t colour;
+
+    VertexStruct(float pos_x, float pos_y, float texCoords_x, float texCoords_y, uint32_t colour):
+        pos_x(pos_x), pos_y(pos_y), texCoords_x(texCoords_x), texCoords_y(texCoords_y), colour(colour) {}
+
+    template <class Archive>
+    void serialize(Archive& ar) {
+        ar(CEREAL_NVP(pos_x),
+           CEREAL_NVP(pos_y),
+           CEREAL_NVP(texCoords_x),
+           CEREAL_NVP(texCoords_y),
+           CEREAL_NVP(colour));
+    }
+};
 namespace Tools {
     bool isInRectangle(sf::Vector2<int> mouse_pos, int x, int y, int w, int h);
     sf::Vector2<int> getTopLeft(sf::Vector2<int> original_coord, int tile_size);
