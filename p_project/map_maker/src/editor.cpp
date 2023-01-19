@@ -2,6 +2,7 @@
 // Created by couland-q on 25/10/22.
 //
 
+
 #include "../include/editor.h"
 
 Editor::Editor() = default;
@@ -14,6 +15,7 @@ void Editor::init(int w, int h, int tile_size) {
     tileset_params.tile_size = tile_size;
 
     window.create(sf::VideoMode(params.size.w, params.size.h), "Map Editor");
+    ImGui::SFML::Init(window);
 }
 
 void Editor::initMap(int w, int h) {
@@ -33,6 +35,7 @@ bool Editor::loadTileset(const std::string& path) {
     }
 
     map.tileset = tileset_text;
+    map.tileset_path = path;
 
     tileset.setTexture(tileset_text);
 
@@ -79,14 +82,17 @@ void Editor::run() {
     tileset_params.pos.y = 0;
     this->tileset.sprite.setPosition(tileset_params.pos.x, tileset_params.pos.y);
 
+    sf::Clock deltaClock;
+
     while (this->window.isOpen()) {
         // check all the window's events that were triggered since the last iteration of the loop
         sf::Event event;
 
         while (this->window.pollEvent(event)) {
             handleEvent(event);
-
         }
+
+        ImGui::SFML::Update(window, deltaClock.restart());
 
         // clear the window with cream color
         window.clear(sf::Color(240, 226, 182));
@@ -98,6 +104,8 @@ void Editor::run() {
         window.draw(this->tileset.sprite);
         drawOverlayingShapes();
 
+        ImGui::SFML::Render(window);
+
         // end the current frame
         window.display();
     }
@@ -105,6 +113,8 @@ void Editor::run() {
 
 void Editor::handleEvent(sf::Event e) {
     status.update();
+
+    ImGui::SFML::ProcessEvent(window, e);
 
     if (e.type == sf::Event::Closed) {
         this->window.close();

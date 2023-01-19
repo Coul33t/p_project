@@ -14,6 +14,8 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/System.hpp>
 
+#include <imgui-SFML.h>
+
 #include "../../../extlib/cereal-1.3.2/include/cereal/archives/xml.hpp"
 
 #include "../../common/include/map.h"

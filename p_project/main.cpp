@@ -1,7 +1,9 @@
 #include <iostream>
 #include "map_maker/include/editor.h"
+#include "examples/imgui_sfml_example.h"
 
 int main() {
+    //test();
     Editor editor;
     editor.init(1280, 720, 16);
     editor.initMap(128, 64);

@@ -5,14 +5,18 @@ set(CMAKE_C_STANDARD 17)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 
+INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/extlib/cereal-1.3.2/include)
+
+# Linux specific includes
 if (UNIX)
     message("UNIX system detected. Ensure that you installed SFML's shared libraries on your system.")
     INCLUDE_DIRECTORIES(/usr/local/include)
     LINK_DIRECTORIES(/usr/local/lib)
     find_package(SFML COMPONENTS graphics window system REQUIRED)
+    find_package(ImGui-SFML REQUIRED)
 endif()
 
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/extlib/cereal-1.3.2/include)
+# Windows specific includes
 if (WIN32)
     message("Windows detected. Fetching library from Github.")
     include(FetchContent)
@@ -60,14 +64,14 @@ file(GLOB all_SRCS
         "${ACTUAL_SOURCE_DIR}/tools/src/*.c"
 )
 
-add_executable(p_project p_project/main.cpp ${all_SRCS} p_project/common/include/common_constants.h)
+add_executable(p_project p_project/main.cpp ${all_SRCS} p_project/examples/imgui_sfml_example.cpp p_project/examples/imgui_sfml_example.h)
 
 target_compile_features(p_project PRIVATE cxx_std_17)
 target_link_libraries(p_project sfml-window sfml-graphics sfml-system)
 
 if (UNIX)
     target_compile_definitions(p_project PRIVATE SFML_STATIC)
-    target_link_libraries(p_project -lstdc++fs)
+    target_link_libraries(p_project -lstdc++fs ImGui-SFML::ImGui-SFML)
 endif()
 
 if (WIN32 AND BUILD_SHARED_LIBS)

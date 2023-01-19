@@ -44,12 +44,14 @@ public:
         }
 
         archive(CEREAL_NVP(size));
+        archive(CEREAL_NVP(tileset_path));
     }
 
     std::vector<Tile> tiles;
     sf::VertexArray vertices_array;
     sf::Texture tileset;
     Size size;
+    std::string tileset_path;
 
 private:
     virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
