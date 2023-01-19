@@ -5,3 +5,4 @@ cmake-build-debug/
 
 extlib/cereal-1.3.2/*
 !extlib/cereal-1.3.2/include/
+extlib/imgui-1.89.2/examples/*
