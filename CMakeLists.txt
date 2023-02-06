@@ -6,6 +6,13 @@ set(CMAKE_C_STANDARD 17)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/extlib/cereal-1.3.2/include)
+INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/extlib/imgui-1.89.2)
+INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/extlib/imgui-1.89.2/backends)
+
+INCLUDE_DIRECTORIES(/usr/include/SDL2)
+
+find_package(SDL2 REQUIRED CONFIG REQUIRED COMPONENTS SDL2)
+find_package(OpenGL REQUIRED)
 
 # Linux specific includes
 if (UNIX)
@@ -62,16 +69,24 @@ file(GLOB all_SRCS
         "${ACTUAL_SOURCE_DIR}/tools/include/*.hpp"
         "${ACTUAL_SOURCE_DIR}/tools/src/*.cpp"
         "${ACTUAL_SOURCE_DIR}/tools/src/*.c"
+
+        "${ACTUAL_SOURCE_DIR}/examples/*.h"
+        "${ACTUAL_SOURCE_DIR}/examples/*.hpp"
+        "${ACTUAL_SOURCE_DIR}/examples/*.cpp"
+        "${ACTUAL_SOURCE_DIR}/examples/*.c"
+
+        "${PROJECT_SOURCE_DIR}/extlib/imgui-1.89.2/backends/imgui_impl_sdl.cpp"
+        "${PROJECT_SOURCE_DIR}/extlib/imgui-1.89.2/backends/imgui_impl_opengl3.cpp"
 )
 
-add_executable(p_project p_project/main.cpp ${all_SRCS} p_project/examples/imgui_sfml_example.cpp p_project/examples/imgui_sfml_example.h)
+add_executable(p_project p_project/main.cpp ${all_SRCS})
 
 target_compile_features(p_project PRIVATE cxx_std_17)
 target_link_libraries(p_project sfml-window sfml-graphics sfml-system)
 
 if (UNIX)
     target_compile_definitions(p_project PRIVATE SFML_STATIC)
-    target_link_libraries(p_project -lstdc++fs ImGui-SFML::ImGui-SFML)
+    target_link_libraries(p_project -lstdc++fs ImGui-SFML::ImGui-SFML SDL2 OpenGL ${CMAKE_DL_LIBS})
 endif()
 
 if (WIN32 AND BUILD_SHARED_LIBS)

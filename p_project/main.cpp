@@ -1,10 +1,13 @@
 #include <iostream>
 #include "map_maker/include/editor.h"
+#include "examples/multiple_windows.h"
 #include "examples/imgui_sfml_example.h"
-
+#include "examples/imgui_test.h"
 int main() {
-    //test();
-    Editor editor;
+    //ImgGuiSFMLMultipleWindows::test();
+    //ImGuiSFMLExample::test();
+    ImGuiTest::test();
+    /*Editor editor;
     editor.init(1280, 720, 16);
     editor.initMap(128, 64);
 
@@ -12,6 +15,6 @@ int main() {
         return 1;
     }
 
-    editor.run();
+    editor.run();*/
     return 0;
 }

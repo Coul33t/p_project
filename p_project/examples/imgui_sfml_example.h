@@ -12,7 +12,9 @@
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/System/Clock.hpp>
 #include <SFML/Window/Event.hpp>
+namespace ImGuiSFMLExample {
+    void test();
+}
 
-void test();
 
 #endif //P_PROJECT_IMGUI_SFML_EXAMPLE_H
