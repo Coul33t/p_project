@@ -1,7 +1,5 @@
 #include <iostream>
 #include "map_maker/include/editor.h"
-#include "examples/multiple_windows.h"
-#include "examples/imgui_sfml_example.h"
 #include "examples/imgui_test.h"
 int main() {
     //ImgGuiSFMLMultipleWindows::test();

@@ -10,14 +10,11 @@
 #include <sstream>
 #include <fstream>
 
-#include <SFML/Window.hpp>
-#include <SFML/Graphics.hpp>
-#include <SFML/System.hpp>
+#include <SDL.h>
 
-#include <imgui-SFML.h>
+#include "cereal/archives/xml.hpp"
 
-#include "../../../extlib/cereal-1.3.2/include/cereal/archives/xml.hpp"
-
+#include "../../common/include/types.h"
 #include "../../common/include/map.h"
 #include "../../tools/include/tools.h"
 #include "../../common/include/sprite.h"
@@ -54,7 +51,14 @@ public:
     Editor();
     ~Editor();
 
-    void init(int w = 640, int h = 320, int tile_size = 16);
+    /**
+     * Initialise the Editor, OpenGL context and SDL display.
+     * @param w The width of the window
+     * @param h The height of the window
+     * @param tile_size The size of a tile
+     * @return 0 if all is good, -1 otherwise
+     */
+    int init(int w = 640, int h = 320, int tile_size = 16);
     void initMap(int w = 128, int h = 64);
     void open() const;
     void run();
@@ -76,11 +80,11 @@ public:
     bool mouseIsInNewTile(sf::Vector2<int> old_coord, sf::Vector2<int> new_coord) const;
 
 
+    SDL_Window* window;
+    SDL_GLContext gl_context;
 
     EditorParams params;
     TilesetParams tileset_params;
-
-    sf::RenderWindow window;
 
     Map map;
     Sprite tileset;

@@ -14,28 +14,6 @@ INCLUDE_DIRECTORIES(/usr/include/SDL2)
 find_package(SDL2 REQUIRED CONFIG REQUIRED COMPONENTS SDL2)
 find_package(OpenGL REQUIRED)
 
-# Linux specific includes
-if (UNIX)
-    message("UNIX system detected. Ensure that you installed SFML's shared libraries on your system.")
-    INCLUDE_DIRECTORIES(/usr/local/include)
-    LINK_DIRECTORIES(/usr/local/lib)
-    find_package(SFML COMPONENTS graphics window system REQUIRED)
-    find_package(ImGui-SFML REQUIRED)
-endif()
-
-# Windows specific includes
-if (WIN32)
-    message("Windows detected. Fetching library from Github.")
-    include(FetchContent)
-    FetchContent_Declare(SFML
-            GIT_REPOSITORY https://github.com/SFML/SFML.git
-            GIT_TAG 2.6.x)
-    FetchContent_MakeAvailable(SFML)
-    set(CMAKE_BUILD_TYPE Release)
-    #set(SFML_DIR "C:/Users/Kontin/Programming/C++/libraries/SFML-2.5.1_64/lib/cmake/SFML/")
-    #find_package(SFML COMPONENTS graphics window system REQUIRED)
-endif()
-
 set(ACTUAL_SOURCE_DIR ${PROJECT_SOURCE_DIR}/p_project)
 
 INCLUDE_DIRECTORIES(
@@ -82,18 +60,17 @@ file(GLOB all_SRCS
 add_executable(p_project p_project/main.cpp ${all_SRCS})
 
 target_compile_features(p_project PRIVATE cxx_std_17)
-target_link_libraries(p_project sfml-window sfml-graphics sfml-system)
+target_link_libraries(p_project -lstdc++fs SDL2 OpenGL ${CMAKE_DL_LIBS})
 
 if (UNIX)
-    target_compile_definitions(p_project PRIVATE SFML_STATIC)
-    target_link_libraries(p_project -lstdc++fs ImGui-SFML::ImGui-SFML SDL2 OpenGL ${CMAKE_DL_LIBS})
+    # target_link_libraries(p_project )
 endif()
 
 if (WIN32 AND BUILD_SHARED_LIBS)
-    add_custom_command(TARGET p_project POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_RUNTIME_DLLS:p_project> $<TARGET_FILE_DIR:p_project> COMMAND_EXPAND_LISTS)
+    #add_custom_command(TARGET p_project POST_BUILD
+            #COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_RUNTIME_DLLS:p_project> $<TARGET_FILE_DIR:p_project> COMMAND_EXPAND_LISTS)
 
-    install(TARGETS p_project)
+    #install(TARGETS p_project)
 endif()
 
 
